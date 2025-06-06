@@ -1,0 +1,6 @@
+{
+  "name": "Profanos de Armitage - Gestor de Fichas",
+  "description": "Una aplicación web para gestionar fichas de personaje del juego de rol 'Profanos de Armitage', utilizando una Hoja de Cálculo de Google como base de datos.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
