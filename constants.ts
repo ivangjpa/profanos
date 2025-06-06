@@ -2,7 +2,7 @@
 import { FieldDefinition, CharacterFormData } from './types';
 
 // !!! IMPORTANT: Replace this URL with your actual Google Apps Script URL from the NEW DEPLOYMENT of the "SÚPER MÍNIMO" script!!!
-export const SHEET_URL: string = "https://script.google.com/macros/s/AKfycbyaMNiOApreAQos6AzbxikgMx-KRPesSz9DR0TDh_8Lmj7LeRWcnIbvF7IqD10y5Rc/exec"; 
+export const SHEET_URL: string = "https://script.google.com/macros/s/AKfycbw2KUc6wpnjG0bUGAvtK6RozuNyVh2BFVN2pi24RzgGnmznP8eAFTFyUYZbwjTE3ltj/exec"; 
 export const DEFAULT_SHEET_URL_PLACEHOLDER: string = "URL_DE_TU_SCRIPT_DE_GOOGLE_APPS";
 
 export const CHARACTER_FIELDS_CONFIG: FieldDefinition[] = [
