@@ -1,8 +1,8 @@
 
 import { FieldDefinition, CharacterFormData } from './types';
 
-// !!! IMPORTANT: Replace this URL with your actual Google Apps Script URL !!!
-export const SHEET_URL: string = "https://script.google.com/macros/s/AKfycbzsLMoRla6ycxPq0LJ1U8Wz0W2Ai-vt4wJ_Cf-Kg3A4AWfHLN7AwuEgxGA_MVxuv7Ny/exec"; 
+// !!! IMPORTANT: Replace this URL with your actual Google Apps Script URL from the NEW DEPLOYMENT !!!
+export const SHEET_URL: string = "https://script.google.com/macros/s/AKfycbz4Qmkmm-hDdlFtNO7Clf4Hqf6h25l8DhT7tnE_drXVpwtujDbOpDhpXxj-Uo4tYFUy/exec"; 
 export const DEFAULT_SHEET_URL_PLACEHOLDER: string = "URL_DE_TU_SCRIPT_DE_GOOGLE_APPS";
 
 export const CHARACTER_FIELDS_CONFIG: FieldDefinition[] = [
