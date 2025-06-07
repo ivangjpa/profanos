@@ -82,9 +82,9 @@ const HomePage: React.FC = () => {
   return (
     <div className={`w-full max-w-2xl mx-auto p-6 md:p-8 ${APP_COLORS.cardBgClass} shadow-lg rounded-lg border border-[${APP_COLORS.cardBorderColorHex}]`}>
       <h1 className={`font-serif text-3xl font-bold text-center text-[${APP_COLORS.titleTextHex}] mb-2 border-b-2 pb-3 border-[${APP_COLORS.accentGreenPrimaryHex}]`}>
-        Índice de Investigadores
+        Equipo de Investigadores
       </h1>
-      <p className={`text-sm text-center mb-6 text-[${APP_COLORS.noteTextHex}]`}>Profanos de Armitage</p>
+      <p className={`text-base font-medium text-center mb-6 text-[${APP_COLORS.noteTextHex}]`}>Profanos de Armitage</p>
 
       {isSheetUrlDefault && (
         <div className={`${APP_COLORS.alertDangerBgClass} border-l-4 border-[${APP_COLORS.alertDangerBorderColorHex}] text-[${APP_COLORS.alertDangerTextHex}] p-4 mb-6 rounded-sm`} role="alert">

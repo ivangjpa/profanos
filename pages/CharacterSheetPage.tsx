@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getCharacterData, updateCharacterData } from '../services/googleSheetService';
@@ -202,9 +203,9 @@ const CharacterSheetPage: React.FC = () => {
             <p className="font-bold">Configuración Requerida</p>
             <p>La URL del script de Google Apps (<code>SHEET_URL</code>) no está configurada en el archivo <code>constants.ts</code>.</p>
           </div>
-          <Link to="/" className={`inline-block mt-4 bg-[${APP_COLORS.buttonDefaultBgHex}] hover:bg-[${APP_COLORS.buttonDefaultHoverBgHex}] text-[${APP_COLORS.buttonDefaultTextHex}] font-semibold py-2 px-4 rounded-sm`}>
-             Volver al Índice
-          </Link>
+          <Button onClick={() => navigate('/')} className="mt-4">
+            Volver al Índice
+          </Button>
         </div>
       );
   }
@@ -213,7 +214,7 @@ const CharacterSheetPage: React.FC = () => {
     return (
       <div className={`w-full max-w-4xl mx-auto p-6 md:p-8 ${APP_COLORS.cardBgClass} shadow-lg rounded-lg border border-[${APP_COLORS.cardBorderColorHex}]`}>
         <p className={`text-[${APP_COLORS.alertDangerTextHex}] text-center mb-4`}>{error}</p>
-        <Link to="/" className={`inline-block bg-[${APP_COLORS.buttonDefaultBgHex}] hover:bg-[${APP_COLORS.buttonDefaultHoverBgHex}] text-[${APP_COLORS.buttonDefaultTextHex}] font-semibold py-2 px-4 rounded-sm`}>Volver al Índice</Link>
+        <Button onClick={() => navigate('/')}>Volver al Índice</Button>
       </div>
     );
   }
@@ -222,7 +223,7 @@ const CharacterSheetPage: React.FC = () => {
      return (
       <div className={`w-full max-w-4xl mx-auto p-6 md:p-8 ${APP_COLORS.cardBgClass} shadow-lg rounded-lg border border-[${APP_COLORS.cardBorderColorHex}]`}>
         <p className={`text-[${APP_COLORS.bodyTextHex}] text-center`}>No se pudieron cargar las definiciones de campos para el personaje.</p>
-        <Link to="/" className={`mt-4 inline-block bg-[${APP_COLORS.buttonDefaultBgHex}] hover:bg-[${APP_COLORS.buttonDefaultHoverBgHex}] text-[${APP_COLORS.buttonDefaultTextHex}] font-semibold py-2 px-4 rounded-sm`}>Volver al Índice</Link>
+        <Button onClick={() => navigate('/')} className="mt-4">Volver al Índice</Button>
       </div>
     );
   }
@@ -249,9 +250,9 @@ const CharacterSheetPage: React.FC = () => {
         <h1 className={`font-serif text-2xl lg:text-3xl font-bold text-[${APP_COLORS.titleTextHex}] mb-2 sm:mb-0`}>
           Ficha: {decodedCharacterName}
         </h1>
-        <Link to="/" className={`text-sm font-semibold text-[${APP_COLORS.accentOchrePrimaryHex}] hover:text-[${APP_COLORS.accentOchreSecondaryHex}] self-start sm:self-center whitespace-nowrap`}>
+        <Button onClick={() => navigate('/')} className="text-sm self-start sm:self-center whitespace-nowrap">
           &larr; Volver al Índice
-        </Link>
+        </Button>
       </div>
 
       <div className={`mb-6 p-3 border border-dashed border-[${APP_COLORS.accentGreenPrimaryHex}]/50 rounded-md bg-[${APP_COLORS.accentGreenPrimaryHex}]/5`}>
