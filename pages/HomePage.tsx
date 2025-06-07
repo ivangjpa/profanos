@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getCharacterList, createCharacter } from '../services/googleSheetService';
@@ -13,11 +12,11 @@ const HomePage: React.FC = () => {
   const [newCharacterName, setNewCharacterName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  const isSheetUrlDefault = SHEET_URL === "URL_DE_TU_SCRIPT_DE_GOOGLE_APPS" || SHEET_URL === DEFAULT_SHEET_URL_PLACEHOLDER;
+  const isSheetUrlDefault = !SHEET_URL || SHEET_URL === DEFAULT_SHEET_URL_PLACEHOLDER;
 
   const fetchCharacters = useCallback(async () => {
     if (isSheetUrlDefault) {
-      setError("La URL del script de Google Apps no está configurada. Edita el archivo `constants.ts`.");
+      setError("La URL del script de Google Apps no está configurada en constants.ts.");
       setIsLoading(false);
       setCharacters([]);
       return;
@@ -43,27 +42,37 @@ const HomePage: React.FC = () => {
   const handleCreateCharacter = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSheetUrlDefault) {
-      alert("Configuración requerida: La URL del script no está configurada en constants.ts.");
+      alert("Configuración requerida: La URL del script de Google Apps no está configurada en constants.ts.");
       return;
     }
     if (!newCharacterName.trim()) {
       alert('Por favor, introduce un nombre para el nuevo personaje.');
       return;
     }
+    
+    const trimmedName = newCharacterName.trim();
+    // Basic validation, Google Apps Script might have more robust validation
+    if (trimmedName.includes('/') || trimmedName.includes('?')) {
+        alert('El nombre del personaje no puede contener "/" o "?".');
+        return;
+    }
+
     setIsCreating(true);
     setError(null);
     try {
-      const result = await createCharacter(newCharacterName.trim());
+      const result = await createCharacter(trimmedName);
       if (result.success) {
-        alert(`Personaje "${newCharacterName.trim()}" creado con éxito.`);
+        alert(result.message || `Personaje "${trimmedName}" creado con éxito.`);
         setNewCharacterName('');
         fetchCharacters(); 
       } else {
         setError(result.error || 'No se pudo crear el personaje.');
+        alert(result.error || 'No se pudo crear el personaje.');
       }
     } catch (err: any) {
       setError(err.error || 'Error de conexión al intentar crear el personaje.');
       console.error(err);
+      alert(err.error || 'Error de conexión al intentar crear el personaje.');
     } finally {
       setIsCreating(false);
     }
@@ -80,7 +89,7 @@ const HomePage: React.FC = () => {
       {isSheetUrlDefault && (
         <div className={`${APP_COLORS.alertDangerBgClass} border-l-4 border-[${APP_COLORS.alertDangerBorderColorHex}] text-[${APP_COLORS.alertDangerTextHex}] p-4 mb-6 rounded-sm`} role="alert">
           <p className="font-bold">Configuración Requerida</p>
-          <p>La URL del script de Google Apps no está configurada. Edita el archivo <code>constants.ts</code> y reemplaza <code>URL_DE_TU_SCRIPT_DE_GOOGLE_APPS</code> con tu URL real.</p>
+          <p>La URL del script de Google Apps (<code>SHEET_URL</code>) no está configurada en el archivo <code>constants.ts</code>. Por favor, añade la URL de tu script desplegado.</p>
         </div>
       )}
 

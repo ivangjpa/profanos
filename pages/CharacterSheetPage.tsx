@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getCharacterData, updateCharacterData } from '../services/googleSheetService';
@@ -13,9 +12,9 @@ const CharacterSheetPage: React.FC = () => {
   const { characterName } = useParams<{ characterName: string }>();
   const navigate = useNavigate();
 
-  const [initialData, setInitialData] = useState<CharacterData | null>(null);
+  const [initialData, setInitialData] = useState<CharacterFormData | null>(null);
   const [formData, setFormData] = useState<CharacterFormData>({ ...DEFAULT_CHARACTER_FORM_DATA });
-  const [fieldDefinitions, setFieldDefinitions] = useState<FieldDefinition[]>([]);
+  const [fieldDefinitions] = useState<FieldDefinition[]>(CHARACTER_FIELDS_CONFIG);
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +23,7 @@ const CharacterSheetPage: React.FC = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   const decodedCharacterName = useMemo(() => characterName ? decodeURIComponent(characterName) : '', [characterName]);
-  const isSheetUrlDefault = SHEET_URL === DEFAULT_SHEET_URL_PLACEHOLDER || SHEET_URL === "URL_DE_TU_SCRIPT_DE_GOOGLE_APPS";
+  const isSheetUrlDefault = !SHEET_URL || SHEET_URL === DEFAULT_SHEET_URL_PLACEHOLDER;
 
   const loadCharacter = useCallback(async () => {
     if (!decodedCharacterName) {
@@ -32,7 +31,7 @@ const CharacterSheetPage: React.FC = () => {
       return;
     }
     if (isSheetUrlDefault) {
-      setError("La URL del script de Google Apps no está configurada. Edita constants.ts.");
+      setError("La URL del script de Google Apps no está configurada en constants.ts.");
       setIsLoading(false);
       return;
     }
@@ -40,14 +39,29 @@ const CharacterSheetPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await getCharacterData(decodedCharacterName);
-      if (data && !(data as any).error) {
-        setInitialData(data);
+      const dataFromSheet = await getCharacterData(decodedCharacterName);
+      if (dataFromSheet && !(dataFromSheet as any).error) {
+        
+        const newFormData: CharacterFormData = { ...DEFAULT_CHARACTER_FORM_DATA };
+        CHARACTER_FIELDS_CONFIG.forEach(configField => {
+            const sheetValue = dataFromSheet[configField.id];
+            if (configField.type === 'number') {
+                (newFormData[configField.id as keyof CharacterFormData] as any) = sheetValue !== undefined ? (Number(sheetValue) || 0) : DEFAULT_CHARACTER_FORM_DATA[configField.id as keyof CharacterFormData];
+            } else {
+                (newFormData[configField.id as keyof CharacterFormData] as any) = sheetValue !== undefined ? String(sheetValue) : DEFAULT_CHARACTER_FORM_DATA[configField.id as keyof CharacterFormData];
+            }
+        });
+        
+        setInitialData(newFormData); // Store the processed data as initial
+        setFormData(newFormData);
+        setHasUnsavedChanges(false);
+        setSaveStatus('idle');
+
       } else {
-        throw new Error((data as any).error || 'Personaje no encontrado o formato de datos incorrecto.');
+        throw new Error((dataFromSheet as any).error || 'Personaje no encontrado o formato de datos incorrecto.');
       }
     } catch (err: any) {
-      const errorMessage = err.error || err.message || 'Error al cargar los datos del personaje.';
+      const errorMessage = err.error || err.message || 'Error al cargar los datos del personaje desde Google Sheets.';
       setError(errorMessage);
       console.error(err);
     } finally {
@@ -59,26 +73,6 @@ const CharacterSheetPage: React.FC = () => {
     loadCharacter();
   }, [loadCharacter]);
 
-  useEffect(() => {
-    const newFieldDefs: FieldDefinition[] = [];
-    const newFormDataState: CharacterFormData = { ...DEFAULT_CHARACTER_FORM_DATA };
-
-    CHARACTER_FIELDS_CONFIG.forEach(configField => {
-        newFieldDefs.push({ ...configField });
-        const rawValueFromSheet = initialData ? initialData[configField.id] : undefined;
-        if (configField.type === 'number') {
-            (newFormDataState[configField.id] as any) = rawValueFromSheet !== undefined ? (parseInt(String(rawValueFromSheet), 10) || 0) : DEFAULT_CHARACTER_FORM_DATA[configField.id as keyof CharacterFormData];
-        } else {
-            (newFormDataState[configField.id] as any) = rawValueFromSheet !== undefined ? String(rawValueFromSheet) : DEFAULT_CHARACTER_FORM_DATA[configField.id as keyof CharacterFormData];
-        }
-    });
-
-    setFieldDefinitions(newFieldDefs);
-    setFormData(newFormDataState);
-    setHasUnsavedChanges(false);
-    setSaveStatus('idle');
-  }, [initialData]);
-
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -87,7 +81,7 @@ const CharacterSheetPage: React.FC = () => {
 
     setFormData(prev => ({
       ...prev,
-      [name]: isNumeric ? (value === '' ? '' : (parseInt(value, 10) || 0)) : value,
+      [name]: isNumeric ? (value === '' ? '' : (parseFloat(value) || 0)) : value,
     }));
 
     if (!hasUnsavedChanges) {
@@ -112,10 +106,16 @@ const CharacterSheetPage: React.FC = () => {
     setError(null);
     
     try {
-      const dataToSave: Partial<CharacterFormData> = {};
+      const dataToSave: Partial<CharacterData> = {}; // Correct type for Google Sheet data
       CHARACTER_FIELDS_CONFIG.forEach(fieldDef => {
-        const formValue = formData[fieldDef.id as keyof CharacterFormData];
-        dataToSave[fieldDef.id as keyof CharacterFormData] = fieldDef.type === 'number' ? (Number(formValue) || 0) : String(formValue ?? '');
+        const key = fieldDef.id as keyof CharacterData; // Use CharacterData keys
+        const formValue = formData[key as keyof CharacterFormData]; // Access formData using the same key
+
+        // All values sent to the sheet service should be strings.
+        // If formValue is a number (e.g., 0 from an empty blurred input), it becomes "0".
+        // If formValue is a string (e.g., from textarea), it remains a string.
+        // Handle undefined/null from formData gracefully.
+        (dataToSave[key] as any) = String(formValue ?? (fieldDef.type === 'number' ? '0' : ''));
       });
 
       const result = await updateCharacterData(decodedCharacterName, dataToSave);
@@ -123,20 +123,15 @@ const CharacterSheetPage: React.FC = () => {
         setHasUnsavedChanges(false);
         setSaveStatus('saved');
         
-        const updatedRawInitialData: CharacterData = { ...initialData } as CharacterData;
-        for (const key of Object.keys(dataToSave) as Array<keyof Partial<CharacterFormData>>) {
-          if (dataToSave[key] !== undefined) {
-            (updatedRawInitialData as any)[key] = String(dataToSave[key]);
-          }
-        }
-        setInitialData(updatedRawInitialData);
+        // Update initialData with the saved formData to reflect the new baseline
+        setInitialData({ ...formData });
 
         setTimeout(() => setSaveStatus('idle'), 2000);
       } else {
-        throw new Error(result.error || 'No se pudo guardar los cambios.');
+        throw new Error(result.error || 'No se pudo guardar los cambios en Google Sheets.');
       }
     } catch (err: any) {
-      const errorMessage = err.error || err.message || 'Error de conexión al intentar guardar.';
+      const errorMessage = err.error || err.message || 'Error de conexión al intentar guardar en Google Sheets.';
       setError(errorMessage);
       setSaveStatus('error'); 
       alert(`Error al guardar: ${errorMessage}`);
@@ -153,7 +148,7 @@ const CharacterSheetPage: React.FC = () => {
     ];
     
     return fieldDefinitions
-        .filter(field => !essentialDisplayFields.includes(field.id))
+        .filter(field => !essentialDisplayFields.includes(field.id)) 
         .reduce((acc, field) => {
             const groupName = field.group || 'Otros Datos';
             if (!acc[groupName]) acc[groupName] = [];
@@ -170,7 +165,7 @@ const CharacterSheetPage: React.FC = () => {
         <div className={`w-full max-w-4xl mx-auto p-6 md:p-8 ${APP_COLORS.cardBgClass} shadow-lg rounded-lg border border-[${APP_COLORS.cardBorderColorHex}]`}>
          <div className={`${APP_COLORS.alertDangerBgClass} border-l-4 border-[${APP_COLORS.alertDangerBorderColorHex}] text-[${APP_COLORS.alertDangerTextHex}] p-4 mb-6 rounded-sm`} role="alert">
             <p className="font-bold">Configuración Requerida</p>
-            <p>La URL del script de Google Apps no está configurada. Edita el archivo <code>constants.ts</code>.</p>
+            <p>La URL del script de Google Apps (<code>SHEET_URL</code>) no está configurada en el archivo <code>constants.ts</code>.</p>
           </div>
           <Link to="/" className={`inline-block mt-4 bg-[${APP_COLORS.buttonDefaultBgHex}] hover:bg-[${APP_COLORS.buttonDefaultHoverBgHex}] text-[${APP_COLORS.buttonDefaultTextHex}] font-semibold py-2 px-4 rounded-sm`}>
              Volver al Índice
@@ -208,11 +203,10 @@ const CharacterSheetPage: React.FC = () => {
     saveButtonVariant = 'unsaved';
   }
 
-  const getNoteForMaxPoints = (type: 'aguante' | 'cordura' | 'estabilidad'): string => {
-    if (type === 'aguante') return '(Constitución × 6)';
-    if (type === 'cordura') return '(Estabilidad Mental × 6)';
-    if (type === 'estabilidad') return '(Estabilidad Mental + 3)';
-    return '(Valor de Hoja)';
+  // Notes for max points now reflect they are from the sheet or calculated there
+  const getNoteForMaxPoints = (fieldId: string): string | undefined => {
+    const fieldDef = CHARACTER_FIELDS_CONFIG.find(f => f.id === fieldId);
+    return fieldDef?.note;
   };
 
   return (
@@ -230,15 +224,15 @@ const CharacterSheetPage: React.FC = () => {
         <h2 className={`font-serif text-lg font-semibold text-[${APP_COLORS.sectionTitleTextHex}] mb-3 text-center sm:text-left`}>Puntos Esenciales</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-4">
           <div className="grid grid-cols-2 gap-x-3">
-            <InputField id="Puntos de Aguante" name="Puntos de Aguante" label="P. Aguante (Max)" value={formData['Puntos de Aguante'] ?? 0} type="number" isReadOnly={true} note={getNoteForMaxPoints('aguante')} onChange={()=>{}} inputClassName="font-semibold" />
+            <InputField id="Puntos de Aguante" name="Puntos de Aguante" label="P. Aguante (Max)" value={formData['Puntos de Aguante'] ?? 0} type="number" isReadOnly={true} note={getNoteForMaxPoints('Puntos de Aguante')} onChange={()=>{}} inputClassName="font-semibold" />
             <InputField id="Aguante actual" name="Aguante actual" label="Aguante Actual" value={formData['Aguante actual'] ?? ''} onChange={handleInputChange} onBlur={handleInputBlur} type="number" inputClassName="font-semibold"/>
           </div>
           <div className="grid grid-cols-2 gap-x-3">
-            <InputField id="Puntos de Cordura" name="Puntos de Cordura" label="P. Cordura (Max)" value={formData['Puntos de Cordura'] ?? 0} type="number" isReadOnly={true} note={getNoteForMaxPoints('cordura')} onChange={()=>{}} inputClassName="font-semibold"/>
+            <InputField id="Puntos de Cordura" name="Puntos de Cordura" label="P. Cordura (Max)" value={formData['Puntos de Cordura'] ?? 0} type="number" isReadOnly={true} note={getNoteForMaxPoints('Puntos de Cordura')} onChange={()=>{}} inputClassName="font-semibold"/>
             <InputField id="Cordura actual" name="Cordura actual" label="Cordura Actual" value={formData['Cordura actual'] ?? ''} onChange={handleInputChange} onBlur={handleInputBlur} type="number" inputClassName="font-semibold"/>
           </div>
           <div className="grid grid-cols-2 gap-x-3">
-            <InputField id="Puntos de Estabilidad" name="Puntos de Estabilidad" label="P. Estabilidad (Max)" value={formData['Puntos de Estabilidad'] ?? 0} type="number" isReadOnly={true} note={getNoteForMaxPoints('estabilidad')} onChange={()=>{}} inputClassName="font-semibold"/>
+            <InputField id="Puntos de Estabilidad" name="Puntos de Estabilidad" label="P. Estabilidad (Max)" value={formData['Puntos de Estabilidad'] ?? 0} type="number" isReadOnly={true} note={getNoteForMaxPoints('Puntos de Estabilidad')} onChange={()=>{}} inputClassName="font-semibold"/>
             <InputField id="Estabilidad actual" name="Estabilidad actual" label="Estabilidad Actual" value={formData['Estabilidad actual'] ?? ''} onChange={handleInputChange} onBlur={handleInputBlur} type="number" inputClassName="font-semibold"/>
           </div>
         </div>
@@ -282,7 +276,7 @@ const CharacterSheetPage: React.FC = () => {
                         key={field.id}
                         id={field.id}
                         label={field.label}
-                        type={field.type as 'number'}
+                        type={field.type as 'number'} 
                         value={fieldValue ?? ''}
                         onChange={handleInputChange}
                         onBlur={handleInputBlur}
