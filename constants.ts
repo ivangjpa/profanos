@@ -9,9 +9,9 @@ export const DEFAULT_SHEET_URL_PLACEHOLDER: string = "TU_GOOGLE_APPS_SCRIPT_URL_
 
 export const CHARACTER_FIELDS_CONFIG: FieldDefinition[] = [
   // Detalles del Personaje
-  { id: 'Profesión', label: 'Profesión', type: 'textarea', rows: 2, group: "Detalles del Personaje" },
-  { id: 'Motivación Principal', label: 'Motivación Principal', type: 'textarea', rows: 3, group: "Detalles del Personaje" },
-  { id: 'Pilares de Estabilidad', label: 'Pilares de Estabilidad', type: 'textarea', rows: 3, group: "Detalles del Personaje" },
+  { id: 'Profesión', label: 'Profesión', type: 'textarea', rows: 10, group: "Detalles del Personaje" },
+  { id: 'Motivación Principal', label: 'Motivación Principal', type: 'textarea', rows: 10, group: "Detalles del Personaje" },
+  { id: 'Pilares de Estabilidad', label: 'Pilares de Estabilidad', type: 'textarea', rows: 10, group: "Detalles del Personaje" },
 
   // Atributos Primarios
   { id: 'Constitución', label: 'Constitución', type: 'number', group: "Atributos Primarios" },
@@ -39,7 +39,7 @@ export const CHARACTER_FIELDS_CONFIG: FieldDefinition[] = [
   { id: 'Puntos de Fortuna', label: 'Puntos de Fortuna', type: 'number', group: "Otros Recursos" },
   
   // Inventario
-  { id: 'Inventario', label: 'Inventario', type: 'textarea', rows: 5, group: "Inventario y Equipamiento" },
+  { id: 'Inventario', label: 'Inventario', type: 'textarea', rows: 10, group: "Inventario y Equipamiento" },
 ];
 
 
