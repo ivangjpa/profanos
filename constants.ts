@@ -1,9 +1,10 @@
-
 import { FieldDefinition, CharacterFormData } from './types';
 
-// !!! IMPORTANT: Replace this URL with your actual Google Apps Script URL from the NEW DEPLOYMENT of the "SÚPER MÍNIMO" script!!!
-export const SHEET_URL: string = "https://script.google.com/macros/s/AKfycbw2KUc6wpnjG0bUGAvtK6RozuNyVh2BFVN2pi24RzgGnmznP8eAFTFyUYZbwjTE3ltj/exec"; 
-export const DEFAULT_SHEET_URL_PLACEHOLDER: string = "URL_DE_TU_SCRIPT_DE_GOOGLE_APPS";
+// !!! IMPORTANTE: REEMPLAZA ESTO CON LA URL DE TU SCRIPT DE GOOGLE APPS !!!
+export const SHEET_URL: string = "https://script.google.com/macros/s/AKfycbyPW7zQUGB5KwkaSj9N9T1I51Kh6vCFR5snM83-tmmO51855JW_dxFiuUNyx244RF1s/exec"; 
+export const DEFAULT_SHEET_URL_PLACEHOLDER: string = "TU_GOOGLE_APPS_SCRIPT_URL_AQUI";
+// !!! --------------------------------------------------------------- !!!
+
 
 export const CHARACTER_FIELDS_CONFIG: FieldDefinition[] = [
   // Detalles del Personaje
@@ -22,11 +23,11 @@ export const CHARACTER_FIELDS_CONFIG: FieldDefinition[] = [
   { id: 'Voluntad', label: 'Voluntad', type: 'number', group: "Atributos Primarios" },
 
   // Campos para Puntos Esenciales (Maximos desde la hoja, Actuales editables)
-  { id: 'Puntos de Aguante', label: 'Puntos de Aguante (Max)', type: 'number', group: "Recursos y Estado", note: '(Valor de Hoja)' },
+  { id: 'Puntos de Aguante', label: 'P. Aguante (Max)', type: 'number', group: "Recursos y Estado", note: '(Valor de la Hoja)' },
   { id: 'Aguante actual', label: 'Aguante Actual', type: 'number', group: "Recursos y Estado" },
-  { id: 'Puntos de Cordura', label: 'Puntos de Cordura (Max)', type: 'number', group: "Recursos y Estado", note: '(Valor de Hoja)' },
+  { id: 'Puntos de Cordura', label: 'P. Cordura (Max)', type: 'number', group: "Recursos y Estado", note: '(Valor de la Hoja)' },
   { id: 'Cordura actual', label: 'Cordura Actual', type: 'number', group: "Recursos y Estado" },
-  { id: 'Puntos de Estabilidad', label: 'Puntos de Estabilidad (Max)', type: 'number', group: "Recursos y Estado", note: '(Valor de Hoja)' },
+  { id: 'Puntos de Estabilidad', label: 'P. Estabilidad (Max)', type: 'number', group: "Recursos y Estado", note: '(Valor de la Hoja)' },
   { id: 'Estabilidad actual', label: 'Estabilidad Actual', type: 'number', group: "Recursos y Estado" },
 
   // Otros Recursos
