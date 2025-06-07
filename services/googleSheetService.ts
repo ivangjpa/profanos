@@ -52,7 +52,7 @@ export const getCharacterList = async (): Promise<string[]> => {
     const url = `${SHEET_URL}?action=getCharacterNames${cacheBust}`;
     const response = await fetchData<ApiCharacterListResponse>(url);
     if (Array.isArray(response)) {
-      return response.filter(name => typeof name === 'string' && name.trim() !== '');
+      return response.filter(name => typeof name === 'string' && name.trim() !== '' && !name.startsWith('*'));
     } else if (response && (response as GoogleSheetErrorResponse).error) {
       throw response as GoogleSheetErrorResponse;
     }
