@@ -1,3 +1,4 @@
+
 import { FieldDefinition, CharacterFormData } from './types';
 
 // !!! IMPORTANTE: REEMPLAZA ESTO CON LA URL DE TU SCRIPT DE GOOGLE APPS !!!
@@ -22,12 +23,12 @@ export const CHARACTER_FIELDS_CONFIG: FieldDefinition[] = [
   { id: 'Percepción', label: 'Percepción', type: 'number', group: "Atributos Primarios" },
   { id: 'Voluntad', label: 'Voluntad', type: 'number', group: "Atributos Primarios" },
 
-  // Campos para Puntos Esenciales (Maximos desde la hoja, Actuales editables)
-  { id: 'Puntos de Aguante', label: 'P. Aguante (Max)', type: 'number', group: "Recursos y Estado", note: '(Valor de la Hoja)' },
+  // Campos para Puntos Esenciales (Maximos calculados, Actuales editables)
+  { id: 'Puntos de Aguante', label: 'P. Aguante (Max)', type: 'number', group: "Recursos y Estado", note: '(Constitución × 6)' },
   { id: 'Aguante actual', label: 'Aguante Actual', type: 'number', group: "Recursos y Estado" },
-  { id: 'Puntos de Cordura', label: 'P. Cordura (Max)', type: 'number', group: "Recursos y Estado", note: '(Valor de la Hoja)' },
+  { id: 'Puntos de Cordura', label: 'P. Cordura (Max)', type: 'number', group: "Recursos y Estado", note: '(Estabilidad Mental × 6)' },
   { id: 'Cordura actual', label: 'Cordura Actual', type: 'number', group: "Recursos y Estado" },
-  { id: 'Puntos de Estabilidad', label: 'P. Estabilidad (Max)', type: 'number', group: "Recursos y Estado", note: '(Valor de la Hoja)' },
+  { id: 'Puntos de Estabilidad', label: 'P. Estabilidad (Max)', type: 'number', group: "Recursos y Estado", note: '(Estabilidad Mental + 3)' },
   { id: 'Estabilidad actual', label: 'Estabilidad Actual', type: 'number', group: "Recursos y Estado" },
 
   // Otros Recursos
