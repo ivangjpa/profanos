@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getCharacterData, updateCharacterData } from '../services/googleSheetService';
@@ -7,6 +8,14 @@ import InputField from '../components/InputField';
 import TextAreaField from '../components/TextAreaField';
 import Button from '../components/Button';
 import { CHARACTER_FIELDS_CONFIG, DEFAULT_CHARACTER_FORM_DATA, APP_COLORS, SHEET_URL, DEFAULT_SHEET_URL_PLACEHOLDER } from '../constants';
+
+const calculateMaxPoints = (constitucion: number, estabilidadMental: number) => {
+  return {
+    'Puntos de Aguante': Math.max(0, constitucion * 6),
+    'Puntos de Cordura': Math.max(0, estabilidadMental * 6),
+    'Puntos de Estabilidad': Math.max(0, estabilidadMental + 3),
+  };
+};
 
 const CharacterSheetPage: React.FC = () => {
   const { characterName } = useParams<{ characterName: string }>();
@@ -42,18 +51,28 @@ const CharacterSheetPage: React.FC = () => {
       const dataFromSheet = await getCharacterData(decodedCharacterName);
       if (dataFromSheet && !(dataFromSheet as any).error) {
         
-        const newFormData: CharacterFormData = { ...DEFAULT_CHARACTER_FORM_DATA };
+        const processedFormData: CharacterFormData = { ...DEFAULT_CHARACTER_FORM_DATA };
         CHARACTER_FIELDS_CONFIG.forEach(configField => {
             const sheetValue = dataFromSheet[configField.id];
             if (configField.type === 'number') {
-                (newFormData[configField.id as keyof CharacterFormData] as any) = sheetValue !== undefined ? (Number(sheetValue) || 0) : DEFAULT_CHARACTER_FORM_DATA[configField.id as keyof CharacterFormData];
+                (processedFormData[configField.id as keyof CharacterFormData] as any) = sheetValue !== undefined ? (Number(sheetValue) || 0) : DEFAULT_CHARACTER_FORM_DATA[configField.id as keyof CharacterFormData];
             } else {
-                (newFormData[configField.id as keyof CharacterFormData] as any) = sheetValue !== undefined ? String(sheetValue) : DEFAULT_CHARACTER_FORM_DATA[configField.id as keyof CharacterFormData];
+                (processedFormData[configField.id as keyof CharacterFormData] as any) = sheetValue !== undefined ? String(sheetValue) : DEFAULT_CHARACTER_FORM_DATA[configField.id as keyof CharacterFormData];
             }
         });
         
-        setInitialData(newFormData); // Store the processed data as initial
-        setFormData(newFormData);
+        // Calculate max points based on loaded data
+        const constitucion = Number(processedFormData['Constitución']) || 0;
+        const estabilidadMental = Number(processedFormData['Estabilidad Mental']) || 0;
+        const maxPoints = calculateMaxPoints(constitucion, estabilidadMental);
+
+        const finalFormData: CharacterFormData = {
+          ...processedFormData,
+          ...maxPoints,
+        };
+        
+        setInitialData(finalFormData); 
+        setFormData(finalFormData);
         setHasUnsavedChanges(false);
         setSaveStatus('idle');
 
@@ -78,11 +97,23 @@ const CharacterSheetPage: React.FC = () => {
     const { name, value } = e.target;
     const fieldDef = fieldDefinitions.find(fd => fd.id === name);
     const isNumeric = fieldDef && fieldDef.type === 'number';
+    const parsedValue = isNumeric ? (value === '' ? '' : (parseFloat(value) || 0)) : value;
 
-    setFormData(prev => ({
-      ...prev,
-      [name]: isNumeric ? (value === '' ? '' : (parseFloat(value) || 0)) : value,
-    }));
+    setFormData(prev => {
+      const newFormData = {
+        ...prev,
+        [name]: parsedValue,
+      };
+
+      // Recalculate max points if Constitución or Estabilidad Mental change
+      if (name === 'Constitución' || name === 'Estabilidad Mental') {
+        const constitucion = name === 'Constitución' ? (Number(parsedValue) || 0) : (Number(prev['Constitución']) || 0);
+        const estabilidadMental = name === 'Estabilidad Mental' ? (Number(parsedValue) || 0) : (Number(prev['Estabilidad Mental']) || 0);
+        const maxPoints = calculateMaxPoints(constitucion, estabilidadMental);
+        return { ...newFormData, ...maxPoints };
+      }
+      return newFormData;
+    });
 
     if (!hasUnsavedChanges) {
       setHasUnsavedChanges(true);
@@ -94,7 +125,17 @@ const CharacterSheetPage: React.FC = () => {
     const { name, value } = e.target;
     const fieldDef = fieldDefinitions.find(fd => fd.id === name);
     if (fieldDef && fieldDef.type === 'number' && value === '') {
-        setFormData(prev => ({ ...prev, [name]: 0 }));
+        setFormData(prev => {
+          const newFormData = { ...prev, [name]: 0 };
+           // Recalculate max points if Constitución or Estabilidad Mental change to 0 on blur
+          if (name === 'Constitución' || name === 'Estabilidad Mental') {
+            const constitucion = name === 'Constitución' ? 0 : (Number(prev['Constitución']) || 0);
+            const estabilidadMental = name === 'Estabilidad Mental' ? 0 : (Number(prev['Estabilidad Mental']) || 0);
+            const maxPoints = calculateMaxPoints(constitucion, estabilidadMental);
+            return { ...newFormData, ...maxPoints };
+          }
+          return newFormData;
+        });
     }
   };
 
@@ -106,15 +147,10 @@ const CharacterSheetPage: React.FC = () => {
     setError(null);
     
     try {
-      const dataToSave: Partial<CharacterData> = {}; // Correct type for Google Sheet data
+      const dataToSave: Partial<CharacterData> = {}; 
       CHARACTER_FIELDS_CONFIG.forEach(fieldDef => {
-        const key = fieldDef.id as keyof CharacterData; // Use CharacterData keys
-        const formValue = formData[key as keyof CharacterFormData]; // Access formData using the same key
-
-        // All values sent to the sheet service should be strings.
-        // If formValue is a number (e.g., 0 from an empty blurred input), it becomes "0".
-        // If formValue is a string (e.g., from textarea), it remains a string.
-        // Handle undefined/null from formData gracefully.
+        const key = fieldDef.id as keyof CharacterData; 
+        const formValue = formData[key as keyof CharacterFormData]; 
         (dataToSave[key] as any) = String(formValue ?? (fieldDef.type === 'number' ? '0' : ''));
       });
 
@@ -123,7 +159,6 @@ const CharacterSheetPage: React.FC = () => {
         setHasUnsavedChanges(false);
         setSaveStatus('saved');
         
-        // Update initialData with the saved formData to reflect the new baseline
         setInitialData({ ...formData });
 
         setTimeout(() => setSaveStatus('idle'), 2000);
@@ -203,7 +238,6 @@ const CharacterSheetPage: React.FC = () => {
     saveButtonVariant = 'unsaved';
   }
 
-  // Notes for max points now reflect they are from the sheet or calculated there
   const getNoteForMaxPoints = (fieldId: string): string | undefined => {
     const fieldDef = CHARACTER_FIELDS_CONFIG.find(f => f.id === fieldId);
     return fieldDef?.note;
