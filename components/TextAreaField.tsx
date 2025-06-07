@@ -24,7 +24,7 @@ const TextAreaField: React.FC<TextAreaFieldProps> = ({
   onChange,
   onBlur,
   isReadOnly = false,
-  rows = 3,
+  rows = 10, // Changed default rows to 10
   note,
   className = '',
   inputClassName = '',
