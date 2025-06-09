@@ -136,6 +136,19 @@ const HomePage: React.FC = () => {
         </form>
         {error && isCreating && <p className={`text-[${APP_COLORS.alertDangerTextHex}] text-sm mt-2`}>{error}</p>}
       </div>
+
+      {/* Nueva sección del Manual de Campo */}
+      <div className={`rulebook-section border-t border-[${APP_COLORS.cardBorderColorHex}] pt-6 mt-8`}>
+        <h2 className={`font-serif text-xl font-semibold text-[${APP_COLORS.sectionTitleTextHex}] mb-3`}>Manual de Campo del Investigador</h2>
+        <p className={`text-[${APP_COLORS.bodyTextHex}] mb-4 text-sm`}>
+          Consulta las reglas, mecánicas y el lore esencial para sobrevivir a los horrores que acechan en las sombras.
+        </p>
+        <Link to="/manual-del-juego">
+          <Button variant="default" className="w-full sm:w-auto">
+            Consultar Manual
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 };
