@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import CharacterSheetPage from './pages/CharacterSheetPage';
+import RulebookPage from './pages/RulebookPage'; // Import the new page
 
 const App: React.FC = () => {
   return (
@@ -9,6 +10,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/ficha/:characterName" element={<CharacterSheetPage />} />
+        <Route path="/manual-del-juego" element={<RulebookPage />} /> {/* Add new route */}
       </Routes>
     </div>
   );
