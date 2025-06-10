@@ -83,3 +83,11 @@ export interface FieldDefinition {
   note?: string;
   rows?: number; // For textarea
 }
+
+export interface Weapon {
+  damage: string;
+  name: string;
+  ability: string;
+  cost: string;
+  notes: string;
+}

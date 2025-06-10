@@ -1,8 +1,11 @@
+
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import CharacterSheetPage from './pages/CharacterSheetPage';
-import RulebookPage from './pages/RulebookPage'; // Import the new page
+import RulebookPage from './pages/RulebookPage';
+import MeleeWeaponsPage from './pages/MeleeWeaponsPage';
+import RangedWeaponsPage from './pages/RangedWeaponsPage';
 
 const App: React.FC = () => {
   return (
@@ -10,7 +13,9 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/ficha/:characterName" element={<CharacterSheetPage />} />
-        <Route path="/manual-del-juego" element={<RulebookPage />} /> {/* Add new route */}
+        <Route path="/manual-del-juego" element={<RulebookPage />} />
+        <Route path="/manual-de-armas/cuerpo-a-cuerpo" element={<MeleeWeaponsPage />} />
+        <Route path="/manual-de-armas/a-distancia" element={<RangedWeaponsPage />} />
       </Routes>
     </div>
   );
