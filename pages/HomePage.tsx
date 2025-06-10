@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getCharacterList, createCharacter } from '../services/googleSheetService';
@@ -137,18 +138,39 @@ const HomePage: React.FC = () => {
         {error && isCreating && <p className={`text-[${APP_COLORS.alertDangerTextHex}] text-sm mt-2`}>{error}</p>}
       </div>
 
-      {/* Nueva sección del Manual de Campo */}
+      {/* Manual de Campo */}
       <div className={`rulebook-section border-t border-[${APP_COLORS.cardBorderColorHex}] pt-6 mt-8`}>
-        <h2 className={`font-serif text-xl font-semibold text-[${APP_COLORS.sectionTitleTextHex}] mb-3`}>Manual de Campo del Investigador</h2>
+        <h2 className={`font-serif text-xl font-semibold text-[${APP_COLORS.sectionTitleTextHex}] mb-3`}>Manual de Campo</h2>
         <p className={`text-[${APP_COLORS.bodyTextHex}] mb-4 text-sm`}>
           Consulta las reglas, mecánicas y el lore esencial para sobrevivir a los horrores que acechan en las sombras.
         </p>
         <Link to="/manual-del-juego">
           <Button variant="default" className="w-full sm:w-auto">
-            Consultar Manual
+            Consultar Manual de Juego
           </Button>
         </Link>
       </div>
+
+      {/* Manual de Armas */}
+      <div className={`weapons-manual-section border-t border-[${APP_COLORS.cardBorderColorHex}] pt-6 mt-8`}>
+        <h2 className={`font-serif text-xl font-semibold text-[${APP_COLORS.sectionTitleTextHex}] mb-3`}>Manual de Armas</h2>
+        <p className={`text-[${APP_COLORS.bodyTextHex}] mb-4 text-sm`}>
+          Un compendio de armamento disponible, desde herramientas improvisadas hasta equipo más especializado para enfrentar los peligros.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link to="/manual-de-armas/cuerpo-a-cuerpo" className="flex-1">
+            <Button variant="default" className="w-full">
+              Armas Cuerpo a Cuerpo
+            </Button>
+          </Link>
+          <Link to="/manual-de-armas/a-distancia" className="flex-1">
+            <Button variant="default" className="w-full">
+              Armas a Distancia
+            </Button>
+          </Link>
+        </div>
+      </div>
+
     </div>
   );
 };
